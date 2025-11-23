@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ecom-auth-services
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecom_auth
+    username: ecom_admin
+    password: Vishalrdkp1
+    driver-class-name: org.postgresql.Driver
+
+app:
+  cors:
+    allowed-origins: "http://localhost:3000" # comma-separated if multiple
+
+jwt:
+  private-key-location: classpath:keystore/private_key.pem
+  public-key-location: classpath:keystore/public_key.pem
+  expiration-ms: 3600000    # 1 hour
+  refresh-expiration-ms: 604800000 # 7 days by default
