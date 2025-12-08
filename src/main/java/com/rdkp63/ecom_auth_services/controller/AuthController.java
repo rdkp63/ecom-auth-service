@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -76,5 +77,12 @@ public class AuthController {
                         .expiresIn(jwtExpirationMs)
                         .build()
         );
+    }
+
+    // ---------------------- LOGOUT -----------------------
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestBody(required = false) Map<String, String> request) {
+        String response = authService.logout(request);
+        return ResponseEntity.ok(response);
     }
 }

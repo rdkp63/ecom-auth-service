@@ -14,11 +14,16 @@ import com.rdkp63.ecom_auth_services.service.AuthService;
 import com.rdkp63.ecom_auth_services.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -102,6 +107,39 @@ public class AuthServiceImplementation implements AuthService {
                 .refreshToken(refreshToken.getToken())
                 .expiresIn(expiresInMs)
                 .build();
+    }
+
+    public ResponseEntity<Map<String, String>> logout(Map<String, String> request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            // We recommend user identity is email (as set in UserDetails)
+            String email = auth.getName();
+            // find user
+            var userOpt = userRepository.findByEmail(email);
+            if (userOpt.isPresent()) {
+                var user = userOpt.get();
+                Integer updated = refreshTokenService.revokeAllRefreshTokensForUser(user.getId());
+                return ResponseEntity
+                        .ok(
+                                Map.of(
+                                        "message", "Logged out from all devices.",
+                                        "row_updated", updated.toString()
+                                )
+                        );
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message","User not found"));
+            }
+        }
+
+        // else: try token-based logout (revoke single refresh token)
+        if (request != null && request.containsKey("refreshToken")) {
+            String refreshToken = request.get("refreshToken");
+            refreshTokenService.revokeByToken(refreshToken);
+            return ResponseEntity.ok(Map.of("message","Refresh token revoked."));
+        }
+
+        return ResponseEntity.badRequest().body(Map.of("message","No authentication or refreshToken provided."));
     }
 
     // ---------------------- Helpers ------------------------

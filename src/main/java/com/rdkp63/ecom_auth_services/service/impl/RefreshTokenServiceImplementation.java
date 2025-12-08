@@ -7,9 +7,11 @@ import com.rdkp63.ecom_auth_services.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -46,5 +48,26 @@ public class RefreshTokenServiceImplementation implements RefreshTokenService {
             throw new RuntimeException("Refresh token expired or revoked");
         }
         return refreshToken;
+    }
+
+    @Override
+    public Optional<RefreshToken> findByToken(String token) {
+        return refreshTokenRepository.findByToken(token);
+    }
+
+    /**
+     * Revoke (bulk) all refresh tokens for a user in a single DB update.
+     *
+     * @return
+     */
+    @Override
+    @Transactional
+    public Integer revokeAllRefreshTokensForUser(Long userId) {
+        return refreshTokenRepository.revokeAllByUserId(userId);
+    }
+
+    @Override
+    public void revokeByToken(String token) {
+
     }
 }
