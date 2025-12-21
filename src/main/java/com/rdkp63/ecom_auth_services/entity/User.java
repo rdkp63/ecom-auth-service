@@ -42,6 +42,15 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name="enabled")
+    private boolean enabled;
+
+    @Column(name="account_non_locked")
+    private boolean accountNonLocked;
+
+    @Column(name="last_login")
+    private LocalDateTime lastLogin;
+
     // Many-to-many via join table
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

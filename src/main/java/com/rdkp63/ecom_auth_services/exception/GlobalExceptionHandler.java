@@ -1,6 +1,6 @@
 package com.rdkp63.ecom_auth_services.exception;
 
-import com.rdkp63.ecom_auth_services.dto.ResponseDTO.ErrorResponse;
+import com.rdkp63.ecom_auth_services.dto.responseDTO.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
