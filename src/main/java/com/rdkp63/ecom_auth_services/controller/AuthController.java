@@ -1,7 +1,7 @@
 package com.rdkp63.ecom_auth_services.controller;
 
 import com.rdkp63.ecom_auth_services.dto.AuthToken;
-import com.rdkp63.ecom_auth_services.dto.ResponseDTO.UserResponse;
+import com.rdkp63.ecom_auth_services.dto.responseDTO.UserResponse;
 import com.rdkp63.ecom_auth_services.dto.requestDTO.LoginRequest;
 import com.rdkp63.ecom_auth_services.dto.requestDTO.RefreshTokenRequest;
 import com.rdkp63.ecom_auth_services.dto.requestDTO.RegisterRequest;
@@ -12,7 +12,6 @@ import com.rdkp63.ecom_auth_services.repository.RefreshTokenRepository;
 import com.rdkp63.ecom_auth_services.security.JwtTokenProvider;
 import com.rdkp63.ecom_auth_services.service.AuthService;
 import com.rdkp63.ecom_auth_services.service.RefreshTokenService;
-import com.rdkp63.ecom_auth_services.service.impl.RefreshTokenServiceImplementation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -81,8 +80,8 @@ public class AuthController {
 
     // ---------------------- LOGOUT -----------------------
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestBody(required = false) Map<String, String> request) {
-        String response = authService.logout(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Map<String,String>> logout(@RequestBody(required = false) Map<String, String> request) {
+        ResponseEntity<Map<String, String>> response = authService.logout(request);
+        return response;
     }
 }

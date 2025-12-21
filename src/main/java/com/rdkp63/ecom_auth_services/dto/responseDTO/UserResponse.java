@@ -1,4 +1,4 @@
-package com.rdkp63.ecom_auth_services.dto.ResponseDTO;
+package com.rdkp63.ecom_auth_services.dto.responseDTO;
 
 import lombok.Builder;
 import lombok.Data;
