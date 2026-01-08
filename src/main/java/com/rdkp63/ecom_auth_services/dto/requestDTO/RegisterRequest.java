@@ -1,10 +1,13 @@
 package com.rdkp63.ecom_auth_services.dto.requestDTO;
 
+import com.rdkp63.ecom_auth_services.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -23,4 +26,6 @@ public class RegisterRequest {
 
     @NotBlank(message = "Full name cannot be null or empty")
     private String fullName;
+
+    private List<String> roles;
 }

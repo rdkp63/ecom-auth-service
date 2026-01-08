@@ -14,7 +14,11 @@ import com.rdkp63.ecom_auth_services.service.AuthService;
 import com.rdkp63.ecom_auth_services.service.RefreshTokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,8 +29,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
@@ -35,13 +40,14 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Value("${jwt.expiration-ms}")
-    private final long jwtExpirationMs;
+    private long jwtExpirationMs;
 
     // --------------------- REGISTER ---------------------
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
+        log.info("Register API called with email={}", request.getEmail());
         UserResponse response = authService.register(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // ---------------------- LOGIN -----------------------

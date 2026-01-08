@@ -13,6 +13,7 @@ import com.rdkp63.ecom_auth_services.security.JwtTokenProvider;
 import com.rdkp63.ecom_auth_services.service.AuthService;
 import com.rdkp63.ecom_auth_services.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImplementation implements AuthService {
 
     private final UserRepository userRepository;
@@ -44,18 +49,38 @@ public class AuthServiceImplementation implements AuthService {
     public UserResponse register(RegisterRequest request) {
 
         //Check if email already exists
-        if(userRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Email "+request.getEmail() + " already registered");
+        log.info("Checking if email already exists or not");
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email " + request.getEmail() + " already registered");
         }
 
         String username = generateUsername(request.getFullName());
 
-        //Fetch USER roles
-        String defaultRoleString = roleRepository.findByName("USER")
-                .orElseThrow(() -> new RuntimeException("Default USER role missing in DB"));
+        log.info("The roles in request is: {}", request.getRoles().toString());
+        Set<Role> roles = null;
+        if (request.getRoles() == null) {
+            log.info("Looking for the default role 'USER' in DB");
+            //Fetch USER roles
+            Role defaultRole = roleRepository.findByName("USER")
+                    .orElseThrow(() -> new RuntimeException("Default USER role missing in DB"));
+            log.info("Found role in DB: USER - {}", defaultRole.toString());
 
-        //Build Role entity
-        Role defaultRole = Role.builder().name("USER").build();
+            //Build Role entity
+            roles = Arrays.stream(
+                    new Role[]{
+                            defaultRole
+                    }
+            ).collect(Collectors.toSet());
+        } else {
+            roles = request.getRoles()
+                    .stream()
+                    .map(
+                            role-> roleRepository.findByName(role).orElseThrow(() -> new RuntimeException("Unable to find role with name: " + role))
+                    )
+                    .collect(Collectors.toSet());
+        }
+
+        log.info("The roles of the user is: {}", roles);
 
         //Build User entity
         User user = User.builder()
@@ -63,17 +88,22 @@ public class AuthServiceImplementation implements AuthService {
                 .username(request.getUserName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
-                .roles(Set.of(defaultRole))
+                .roles(roles)
                 .active(true)
                 .emailVerified(false)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
 
+        log.info("Built user is: {}", user);
+
         User saved = userRepository.save(user);
+        log.info("Saved user in the DB: {}", saved);
 
         return UserResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
+                .id(saved.getId())
+                .email(saved.getEmail())
+                .fullName(saved.getFullName())
                 .build();
     }
 
@@ -95,7 +125,7 @@ public class AuthServiceImplementation implements AuthService {
         String jwtToken = jwtTokenProvider.createToken(
                 user.getUsername(),
                 user.getRoles().stream()
-                        .map(role-> role.getName())
+                        .map(Role::getName)
                         .toList(),
                 user.getId()
         );
