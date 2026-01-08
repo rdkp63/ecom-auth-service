@@ -1,6 +1,5 @@
 package com.rdkp63.ecom_auth_services.dto.requestDTO;
 
-import com.rdkp63.ecom_auth_services.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

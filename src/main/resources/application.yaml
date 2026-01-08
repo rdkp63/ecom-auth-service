@@ -1,3 +1,4 @@
+debug: false
 spring:
   application:
     name: ecom-auth-services
@@ -8,6 +9,20 @@ spring:
     password: Vishalrdkp1
     driver-class-name: org.postgresql.Driver
 
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate   # use update ONLY for local testing
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+    sql:
+      init:
+        mode: never
+
 app:
   cors:
     allowed-origins: "http://localhost:3000" # comma-separated if multiple
@@ -17,3 +32,18 @@ jwt:
   public-key-location: classpath:keystore/public_key.pem
   expiration-ms: 3600000    # 1 hour
   refresh-expiration-ms: 604800000 # 7 days by default
+
+logging:
+  level:
+    org.flywaydb: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.transaction: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, mappings
