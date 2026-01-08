@@ -1,6 +1,5 @@
 package com.rdkp63.ecom_auth_services.security;
 
-import com.rdkp63.ecom_auth_services.entity.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
