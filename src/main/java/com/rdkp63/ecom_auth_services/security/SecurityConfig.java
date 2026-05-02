@@ -50,22 +50,24 @@ public class SecurityConfig {
 
         https.cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-//            .sessionManagement(session -> session
-//                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//            )
-//            .authorizeHttpRequests(auth -> auth
-//                    .requestMatchers(
-//                            "/auth/**",
-//                            "/v3/api-docs/**",
-//                            "/swagger-ui/**",
-//                            "/swagger-ui.html",
-//                            "/actuator/health"
-//                    ).permitAll()
-//                    .anyRequest().authenticated()
-//            );
+            .sessionManagement(session -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(
+                            "/api/v1/auth/register",
+                            "/api/v1/auth/login",
+                            "/api/v1/auth/refresh",
+                            "/v3/api-docs/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html",
+                            "/actuator/health",
+                            "/actuator/mappings"
+                    ).permitAll()
+                    .anyRequest().authenticated()
+            );
 
-//        https.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        https.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return https.build();
     }

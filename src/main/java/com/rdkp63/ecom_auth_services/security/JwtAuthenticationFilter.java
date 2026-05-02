@@ -1,6 +1,5 @@
 package com.rdkp63.ecom_auth_services.security;
 
-import com.rdkp63.ecom_auth_services.entity.Role;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,12 +14,12 @@ import java.io.IOException;
 import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private JwtTokenProvider jwtTokenProvider;
-    private CustomUserDetailsService customUserDetailsService;
+    private final JwtTokenProvider JWT_TOKEN_PROVIDER;
+    private final CustomUserDetailsService CUSTOM_USER_DETAILS_SERVICE;
 
     public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, CustomUserDetailsService userDetailsService) {
-        this.jwtTokenProvider = tokenProvider;
-        this.customUserDetailsService = userDetailsService;
+        this.JWT_TOKEN_PROVIDER = tokenProvider;
+        this.CUSTOM_USER_DETAILS_SERVICE = userDetailsService;
     }
 
     @Override
@@ -32,12 +31,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
-            if(jwtTokenProvider.validateToken(token)){
-                String username = jwtTokenProvider.getUsername(token);
+            if (JWT_TOKEN_PROVIDER.validateToken(token)) {
+                String username = JWT_TOKEN_PROVIDER.getUsername(token);
                 // Load user details for additional checks
-                var userDetails = customUserDetailsService.loadUserByUsername(username);
+                var userDetails = CUSTOM_USER_DETAILS_SERVICE.loadUserByUsername(username);
 
-                List<SimpleGrantedAuthority> authorities = jwtTokenProvider.getRoles(token).stream()
+                List<SimpleGrantedAuthority> authorities = JWT_TOKEN_PROVIDER.getRoles(token).stream()
                         .map(SimpleGrantedAuthority::new)
                         .toList();
 
@@ -45,8 +44,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
-
-            filterChain.doFilter(request, response);
         }
+        filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.equals("/api/v1/auth/register")
+                || path.equals("/api/v1/auth/login")
+                || path.equals("/api/v1/auth/refresh");
     }
 }

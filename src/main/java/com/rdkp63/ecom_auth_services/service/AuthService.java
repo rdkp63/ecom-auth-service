@@ -1,6 +1,8 @@
 package com.rdkp63.ecom_auth_services.service;
 
 import com.rdkp63.ecom_auth_services.dto.AuthToken;
+import com.rdkp63.ecom_auth_services.dto.requestDTO.LogoutRequest;
+import com.rdkp63.ecom_auth_services.dto.requestDTO.RefreshTokenRequest;
 import com.rdkp63.ecom_auth_services.dto.responseDTO.UserResponse;
 import com.rdkp63.ecom_auth_services.dto.requestDTO.LoginRequest;
 import com.rdkp63.ecom_auth_services.dto.requestDTO.RegisterRequest;
@@ -14,5 +16,7 @@ public interface AuthService {
 
     AuthToken login(LoginRequest request);
 
-    ResponseEntity<Map<String, String>> logout(Map<String, String> request);
+    ResponseEntity<Map<String, String>> logout(LogoutRequest request);
+
+    AuthToken refresh(RefreshTokenRequest request);
 }

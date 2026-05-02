@@ -1,6 +1,7 @@
 package com.rdkp63.ecom_auth_services.controller;
 
 import com.rdkp63.ecom_auth_services.dto.AuthToken;
+import com.rdkp63.ecom_auth_services.dto.requestDTO.LogoutRequest;
 import com.rdkp63.ecom_auth_services.dto.responseDTO.UserResponse;
 import com.rdkp63.ecom_auth_services.dto.requestDTO.LoginRequest;
 import com.rdkp63.ecom_auth_services.dto.requestDTO.RefreshTokenRequest;
@@ -33,9 +34,6 @@ import java.util.stream.Collectors;
 public class AuthController {
 
     private final AuthService authService;
-    private final RefreshTokenService refreshTokenService;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @Value("${jwt.expiration-ms}")
     private long jwtExpirationMs;
@@ -58,34 +56,13 @@ public class AuthController {
     // ---------------------- REFRESH_TOKEN ----------------
     @PostMapping("/refresh")
     public ResponseEntity<AuthToken> refresh(@RequestBody RefreshTokenRequest request) {
-
-        RefreshToken refreshToken = refreshTokenRepository
-                .findByToken(request.getRefreshToken())
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
-
-        refreshTokenService.verifyExpiration(refreshToken);
-
-        User user = refreshToken.getUser();
-
-        String newAccessToken = jwtTokenProvider.createToken(
-                user.getEmail(),
-                user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()),
-                user.getId()
-        );
-
-        return ResponseEntity.ok(
-                AuthToken.builder()
-                        .accessToken(newAccessToken)
-                        .refreshToken(refreshToken.getToken()) // same refresh token
-                        .expiresIn(jwtExpirationMs)
-                        .build()
-        );
+        AuthToken newAuthToken = authService.refresh(request);
+        return ResponseEntity.ok(newAuthToken);
     }
 
     // ---------------------- LOGOUT -----------------------
     @PostMapping("/logout")
-    public ResponseEntity<Map<String,String>> logout(@RequestBody(required = false) Map<String, String> request) {
-        ResponseEntity<Map<String, String>> response = authService.logout(request);
-        return response;
+    public ResponseEntity<Map<String,String>> logout(@RequestBody(required = false) LogoutRequest request) {
+        return authService.logout(request);
     }
 }
